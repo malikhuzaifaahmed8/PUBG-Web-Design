@@ -116,9 +116,10 @@ const Hero = () => {
   // Faster preloader fade-out
   const handleVideoLoad = () => {
     setIsVideoLoaded(true);
+    // Much faster fade out - reduced from 0.4s to 0.2s
     gsap.to("#video-loading", {
       opacity: 0,
-      duration: 0.4,
+      duration: 0.2, // Faster duration
       ease: "power1.out",
       onComplete: () => {
         const loader = document.getElementById("video-loading");
@@ -133,20 +134,21 @@ const Hero = () => {
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-gray-900 transition-all duration-700 ease-in-out"
       >
-        {/* Loading Overlay */}
+        {/* Loading Overlay - Added faster transition */}
         <div
           id="video-loading"
-          className="absolute inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-500 ease-in-out"
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-200 ease-in-out" // Faster transition
         >
           <div className="text-center">
-            <div className="w-14 h-14 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            {/* Faster spinner animation */}
+            <div className="w-12 h-12 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ animationDuration: '0.6s' }}></div>
             <p className="text-yellow-400 font-semibold text-xs tracking-widest">
               LOADING BATTLEGROUNDS...
             </p>
           </div>
         </div>
 
-        {/* Hero Video */}
+        {/* Hero Video - Added onLoadStart for faster detection */}
         <video
           ref={videoRef}
           src="/videos/PUBG Xbox 2018 E3 Trailer.mp4"
@@ -155,6 +157,7 @@ const Hero = () => {
           muted
           playsInline
           preload="auto"
+          onLoadStart={handleVideoLoad} // Added for faster loading detection
           onLoadedData={handleVideoLoad}
           className="absolute left-0 top-0 size-full object-cover object-center transition-all duration-700 ease-in-out"
         />
