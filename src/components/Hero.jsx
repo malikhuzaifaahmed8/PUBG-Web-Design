@@ -23,32 +23,20 @@ const Hero = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   useGSAP(() => {
-    // Initial clipPath setup
+    // Set initial styles
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
       borderRadius: "0% 0% 40% 10%",
       willChange: "transform, opacity, clip-path",
     });
 
-    // Main timeline — same as before, but smoother
+    // Intro animation timeline
     const tl = gsap.timeline({
       defaults: { ease: "power2.out", duration: 1, force3D: true },
     });
 
-    tl.from("#main-title", {
-      y: 80,
-      opacity: 0,
-      duration: 1.2,
-    })
-      .from(
-        "#subtitle",
-        {
-          y: 40,
-          opacity: 0,
-          duration: 0.9,
-        },
-        "-=0.6"
-      )
+    tl.from("#main-title", { y: 80, opacity: 0, duration: 1.2 })
+      .from("#subtitle", { y: 40, opacity: 0, duration: 0.9 }, "-=0.6")
       .from(
         "#cta-button",
         {
@@ -62,16 +50,11 @@ const Hero = () => {
       )
       .from(
         ".stat-item",
-        {
-          y: 25,
-          opacity: 0,
-          stagger: 0.15,
-          duration: 0.8,
-        },
+        { y: 25, opacity: 0, stagger: 0.15, duration: 0.8 },
         "-=0.5"
       );
 
-    // Smooth Scroll animation (same look, smoother motion)
+    // ClipPath scroll animation
     gsap.fromTo(
       "#video-frame",
       {
@@ -93,7 +76,7 @@ const Hero = () => {
       }
     );
 
-    // Floating title (same, smoother)
+    // Floating and shining text animations
     gsap.to("#floating-title", {
       y: -20,
       duration: 2.5,
@@ -103,7 +86,6 @@ const Hero = () => {
       force3D: true,
     });
 
-    // Shining text (same)
     gsap.to("#main-title .shining-text", {
       backgroundPositionX: "100%",
       duration: 4,
@@ -113,7 +95,6 @@ const Hero = () => {
     });
   });
 
-  // Faster preloader fade-out
   const handleVideoLoad = () => {
     setIsVideoLoaded(true);
     gsap.to("#video-loading", {
@@ -156,7 +137,9 @@ const Hero = () => {
           playsInline
           preload="auto"
           onLoadedData={handleVideoLoad}
-          className="absolute left-0 top-0 size-full object-cover object-center transition-all duration-700 ease-in-out"
+          className={`absolute left-0 top-0 size-full object-cover object-center transition-all duration-700 ease-in-out ${
+            isVideoLoaded ? "opacity-100" : "opacity-0"
+          }`}
         />
 
         {/* Dark Overlay */}
@@ -200,26 +183,27 @@ const Hero = () => {
 
             {/* Stats */}
             <div className="flex flex-wrap gap-6 sm:gap-8 text-white transition-all duration-500 ease-in-out">
-              <div className="stat-item text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 min-w-[100px] hover:bg-white/20 transition-all duration-500 ease-in-out">
-                <FaUsers className="text-yellow-400 text-xl mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-bold">100M+</div>
-                <div className="text-xs opacity-80 tracking-wide">PLAYERS</div>
-              </div>
-              <div className="stat-item text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 min-w-[100px] hover:bg-white/20 transition-all duration-500 ease-in-out">
-                <FaTrophy className="text-yellow-400 text-xl mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-bold">#1</div>
-                <div className="text-xs opacity-80 tracking-wide">BATTLE ROYALE</div>
-              </div>
-              <div className="stat-item text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 min-w-[100px] hover:bg-white/20 transition-all duration-500 ease-in-out">
-                <FaSkull className="text-yellow-400 text-xl mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-bold">100</div>
-                <div className="text-xs opacity-80 tracking-wide">PLAYERS PER MATCH</div>
-              </div>
-              <div className="stat-item text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 min-w-[100px] hover:bg-white/20 transition-all duration-500 ease-in-out">
-                <FaAward className="text-yellow-400 text-xl mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-bold">4.8</div>
-                <div className="text-xs opacity-80 tracking-wide">RATING</div>
-              </div>
+              {[
+                { icon: <FaUsers />, value: "100M+", label: "PLAYERS" },
+                { icon: <FaTrophy />, value: "#1", label: "BATTLE ROYALE" },
+                { icon: <FaSkull />, value: "100", label: "PLAYERS PER MATCH" },
+                { icon: <FaAward />, value: "4.8", label: "RATING" },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="stat-item text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 min-w-[100px] hover:bg-white/20 transition-all duration-500 ease-in-out"
+                >
+                  <div className="text-yellow-400 text-xl mx-auto mb-2">
+                    {stat.icon}
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs opacity-80 tracking-wide">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
