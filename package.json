@@ -1,13 +1,16 @@
 {
-  "name": "awwwards-website",
+  "name": "pubg-web-design",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "homepage": "https://malikhuzaifaahmed8.github.io/PUBG-Web-Design/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -32,6 +35,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "eslint-plugin-tailwindcss": "^3.17.5",
+    "gh-pages": "^6.0.0",
     "globals": "^15.11.0",
     "postcss": "^8.4.49",
     "prettier": "^3.3.3",
