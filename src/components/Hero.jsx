@@ -13,7 +13,6 @@ import {
   FaAward,
 } from "react-icons/fa";
 import Button from "./Button";
-import VideoPreview from "./VideoPreview";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,11 +20,21 @@ const Hero = () => {
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
-  // --- Handle Video Loading (with fallback timeout)
+  // --- Handle Video Loading (5s fallback)
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVideoLoaded(true); // hide loader after 3s fallback
-    }, 3000);
+      setIsVideoLoaded(true);
+      const loader = document.getElementById("video-loading");
+      if (loader) {
+        gsap.to(loader, {
+          opacity: 0,
+          duration: 0.4,
+          ease: "power1.out",
+          onComplete: () => (loader.style.display = "none"),
+        });
+      }
+    }, 5000); // Force hide loader after 5s
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,15 +51,14 @@ const Hero = () => {
     });
   };
 
+  // --- GSAP Animations
   useGSAP(() => {
-    // Set initial styles
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
       borderRadius: "0% 0% 40% 10%",
       willChange: "transform, opacity, clip-path",
     });
 
-    // Intro animation
     const tl = gsap.timeline({
       defaults: { ease: "power2.out", duration: 1, force3D: true },
     });
@@ -74,7 +82,7 @@ const Hero = () => {
         "-=0.5"
       );
 
-    // ClipPath scroll animation
+    // Clip path scroll animation
     gsap.fromTo(
       "#video-frame",
       {
@@ -94,7 +102,7 @@ const Hero = () => {
       }
     );
 
-    // Floating and shining text animations
+    // Floating and shining text
     gsap.to("#floating-title", {
       y: -20,
       duration: 2.5,
@@ -113,6 +121,7 @@ const Hero = () => {
 
   return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
+      {/* Video Container */}
       <div
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-gray-900 transition-all duration-700 ease-in-out"
@@ -132,7 +141,7 @@ const Hero = () => {
           </div>
         )}
 
-        {/* Background Hero Video */}
+        {/* Background Video */}
         <video
           ref={videoRef}
           src="/videos/PUBG Xbox 2018 E3 Trailer.mp4"
@@ -141,17 +150,17 @@ const Hero = () => {
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
           onLoadedData={handleVideoLoad}
           className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-700 ease-in-out ${
             isVideoLoaded ? "opacity-100" : "opacity-0"
           }`}
         />
 
-        {/* Dark Overlay */}
+        {/* Overlay */}
         <div className="absolute inset-0 bg-black/40 z-20"></div>
 
-        {/* Floating Title */}
+        {/* Floating Background Title */}
         <h1
           id="floating-title"
           className="special-font absolute bottom-5 right-5 z-40 text-white/20 text-6xl md:text-8xl font-black tracking-wider select-none"
@@ -159,9 +168,10 @@ const Hero = () => {
           PUBG
         </h1>
 
-        {/* Main Text Content */}
+        {/* Text + Stats */}
         <div className="absolute left-0 top-0 z-40 size-full flex items-center">
           <div className="mt-16 px-5 sm:px-10 max-w-4xl">
+            {/* Main Title */}
             <h1 id="main-title" className="special-font text-white mb-6">
               <span className="text-3xl sm:text-4xl md:text-5xl font-black block leading-tight tracking-tight">
                 WELCOME TO
@@ -171,6 +181,7 @@ const Hero = () => {
               </span>
             </h1>
 
+            {/* Subtitle */}
             <div id="subtitle" className="mb-8 max-w-2xl">
               <p className="font-semibold text-white/90 text-lg sm:text-xl mb-4 tracking-wide flex items-center gap-3">
                 <FaCrosshairs className="text-red-500" />
@@ -178,6 +189,7 @@ const Hero = () => {
               </p>
             </div>
 
+            {/* CTA Button */}
             <div id="cta-button" className="mb-12">
               <Button
                 id="play-now"
