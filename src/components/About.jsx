@@ -2,13 +2,14 @@ import YouTubeBg from "./YouTubeBg";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
+import { useEffect, useRef, useState } from "react";
 import AnimatedTitle from "./AnimatedTitle";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   useGSAP(() => {
-    // Clip scroll animation (text transition)
+    // Clip scroll animation
     const clipAnimation = gsap.timeline({
       scrollTrigger: {
         trigger: "#clip",
@@ -38,10 +39,9 @@ const About = () => {
         "-=0.5"
       );
 
-    // Map fade-up animations
     gsap.fromTo(
       ".map-item",
-      { opacity: 0, y: 50, scale: 0.8 },
+      { opacity: 0, y: 50, scale: 0.9 },
       {
         opacity: 1,
         y: 0,
@@ -57,9 +57,33 @@ const About = () => {
       }
     );
 
-    // Initial state
     gsap.set(".battle-text", { opacity: 0, y: 50 });
   });
+
+  // Lazy video loading hook
+  const useLazyVideo = (selector) => {
+    useEffect(() => {
+      const videos = document.querySelectorAll(selector);
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const video = entry.target;
+            if (entry.isIntersecting && video.dataset.src) {
+              video.src = video.dataset.src; // load video
+              video.load();
+              video.play().catch(() => {});
+              observer.unobserve(video);
+            }
+          });
+        },
+        { threshold: 0.25 }
+      );
+      videos.forEach((video) => observer.observe(video));
+      return () => observer.disconnect();
+    }, []);
+  };
+
+  useLazyVideo(".lazy-video");
 
   const maps = [
     {
@@ -130,17 +154,16 @@ const About = () => {
                 className="map-item group relative overflow-hidden rounded-lg shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 transform hover:-translate-y-1"
               >
                 <div className="aspect-video relative">
+                  {/* Lazy Loaded Video */}
                   <video
-                    autoPlay
+                    data-src={map.video}
+                    poster={map.thumbnail}
                     muted
                     loop
                     playsInline
-                    className="w-full h-full object-cover"
-                    poster={map.thumbnail}
-                  >
-                    <source src={map.video} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                    preload="none"
+                    className="lazy-video w-full h-full object-cover"
+                  />
 
                   {/* Hover Info Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
