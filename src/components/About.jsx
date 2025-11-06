@@ -8,8 +8,51 @@ import AnimatedTitle from "./AnimatedTitle";
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
+  const [loadedVideos, setLoadedVideos] = useState({});
+  const videoRefs = useRef({});
+
+  // --- Fast Lazy Video Loading (5s fallback)
+  useEffect(() => {
+    const videos = document.querySelectorAll(".lazy-video");
+
+    const loadVideo = (video) => {
+      if (video.dataset.src && !video.src) {
+        video.src = video.dataset.src;
+        video.load();
+        video.play().catch(() => {});
+        setLoadedVideos((prev) => ({ ...prev, [video.dataset.src]: true }));
+      }
+    };
+
+    // Intersection Observer for lazy loading
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            loadVideo(video);
+            observer.unobserve(video);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    videos.forEach((video) => observer.observe(video));
+
+    // --- Fallback: load all visible videos after 5s
+    const timeout = setTimeout(() => {
+      videos.forEach((video) => loadVideo(video));
+    }, 5000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  // --- GSAP Animations
   useGSAP(() => {
-    // Clip scroll animation
     const clipAnimation = gsap.timeline({
       scrollTrigger: {
         trigger: "#clip",
@@ -60,31 +103,7 @@ const About = () => {
     gsap.set(".battle-text", { opacity: 0, y: 50 });
   });
 
-  // Lazy video loading hook
-  const useLazyVideo = (selector) => {
-    useEffect(() => {
-      const videos = document.querySelectorAll(selector);
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const video = entry.target;
-            if (entry.isIntersecting && video.dataset.src) {
-              video.src = video.dataset.src; // load video
-              video.load();
-              video.play().catch(() => {});
-              observer.unobserve(video);
-            }
-          });
-        },
-        { threshold: 0.25 }
-      );
-      videos.forEach((video) => observer.observe(video));
-      return () => observer.disconnect();
-    }, []);
-  };
-
-  useLazyVideo(".lazy-video");
-
+  // --- Map Data
   const maps = [
     {
       name: "Erangel",
@@ -154,15 +173,24 @@ const About = () => {
                 className="map-item group relative overflow-hidden rounded-lg shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 transform hover:-translate-y-1"
               >
                 <div className="aspect-video relative">
-                  {/* Lazy Loaded Video */}
+                  {/* Fast Lazy Loaded Video */}
                   <video
+                    ref={(el) => (videoRefs.current[map.name] = el)}
                     data-src={map.video}
                     poster={map.thumbnail}
                     muted
                     loop
                     playsInline
                     preload="none"
-                    className="lazy-video w-full h-full object-cover"
+                    className={`lazy-video w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
+                      loadedVideos[map.video] ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoadedData={() =>
+                      setLoadedVideos((prev) => ({
+                        ...prev,
+                        [map.video]: true,
+                      }))
+                    }
                   />
 
                   {/* Hover Info Overlay */}
@@ -214,7 +242,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* Clip Section: Text Transition */}
+      {/* Clip Section */}
       <div
         className="h-dvh w-screen relative bg-gradient-to-b from-gray-900 via-black to-gray-900 overflow-hidden"
         id="clip"
